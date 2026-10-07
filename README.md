@@ -1,107 +1,70 @@
-> **Epitech project — `G-SEC-210` (`pipeto`)**
+# PIPETO
+
+Audit de sécurité complet d'un logiciel de contrôle de réacteur nucléaire
+volontairement vulnérable : identifier les failles, les exploiter **sans jamais
+modifier le code d'origine**, puis les corriger proprement et prouver chaque
+correctif par un test unitaire.
+
+Le projet se joue en Purple Team — la partie offensive (Red Team) et la partie
+défensive (Blue Team) sont menées par la même équipe, ce qui oblige à comprendre
+une faille en profondeur avant de pouvoir la réparer.
+
+> **Epitech · `G-SEC-210` (« pipeto »)** — projet d'équipe mené avec
+> [graigware](https://github.com/graigware).
 >
-> Built with [graigware](https://github.com/graigware).
-> I worked on the reverse-engineering and exploitation analysis.
+> **Mon rôle :** analyse par rétro-ingénierie et exploitation.
 >
-> This is my own copy of the assignment repository, published here as a
-> portfolio piece. The original repository is private.
+> Ce dépôt est ma copie personnelle du rendu, publiée comme projet de portfolio.
+> Le dépôt d'origine est privé. Le rapport écrit n'est pas inclus ici (il cite des
+> éléments du sujet confidentiel) — les preuves du travail restent les correctifs,
+> les tests et le code de la librairie récupérée.
 
 ---
 
-# 🔐 PIPETO - Reverse Engineering & Binary Exploitation
+## Contexte
 
-## 📘 Introduction
+L'application est un shell de commandes (`pipeto`) pilotant un réacteur : charge de
+combustible, pression de refroidissement, puissance, diagnostic, protocole
+d'urgence. Elle s'appuie sur une bibliothèque partagée, `libpepito.so`, fournie
+**sans code source** — d'où une première phase d'analyse en boîte noire.
 
-**PIPETO** est un projet de cybersécurité complet centré sur l’audit et l’exploitation d’un binaire compilé. Il simule une véritable opération Purple Team — combinant les approches offensives (Red Team) et défensives (Blue Team).
+## Démarche
 
-Ce projet plonge les étudiants dans les réalités de l’analyse binaire, de l’exploitation de vulnérabilités et de la sécurisation de code, dans un contexte à haute pression, proche du réel.
+1. **Audit Black Box** — le binaire et la bibliothèque uniquement : cartographie des
+   commandes, désassemblage, recherche de motifs suspects.
+2. **Audit White Box** — une fois le code source disponible, revue ligne à ligne des
+   fonctions sensibles : `check_cooling_pressure`, `set_reactor_power`,
+   `load_config`, `run_turbine`, `unlock_secret_mode`, etc.
+3. **Exploitation** — chaque faille est prouvée par un script, sans toucher au code
+   d'origine.
+4. **Remédiation** — un patch par faille, un test unitaire par correctif.
 
----
+## Contenu du dépôt
 
-## 🎯 Mission Context
+| Dossier | Contenu |
+|---|---|
+| `Pipeto/Pipeto/` | Le shell vulnérable : `src/main.c`, `src/my_console.c`, `src/utils.c` et `src/commands/` (17 commandes) |
+| `libpipeto/` | Les fonctions de `libpepito.so` reconstituées à partir de la bibliothèque fournie (rétro-ingénierie) |
+| `patch/` | 17 correctifs au format `.patch` — un par faille, plus les ajustements de `Makefile`, `main` et `utils` |
+| `tests/` | 10 tests unitaires validant les correctifs |
 
-Vous êtes **Application Security Engineer** chez **The Stone Corporation**, une société de cybersécurité de haut niveau. Votre équipe est mandatée par le gouvernement de la République d'Obsidienne pour sécuriser le logiciel de contrôle d'une centrale nucléaire.
-
-Le logiciel est fonctionnel, mais dépourvu de protections modernes. Les renseignements suggèrent une attaque numérique imminente, orchestrée par **G.O.L.E.M.** (Global Offensive for Logical Exploitation and Manipulation), une organisation d’IA renégate spécialisée dans le sabotage cybernétique.
-
-Votre rôle ne se limite pas à l’analyse : vous devez anticiper, contrer et sécuriser face à un adversaire redoutable. Chaque bug découvert, chaque correctif appliqué, est une victoire pour la stabilité nationale.
-
----
-
-## 🧠 Purple Team
-
-| Rôle         | Objectif                                                              |
-|--------------|-----------------------------------------------------------------------|
-| 🔴 Red Team  | Simuler les attaques, identifier les vulnérabilités, extraire des données critiques |
-| 🔵 Blue Team | Corriger les vulnérabilités, valider les corrections avec tests et patchs |
-| 🟣 Purple Team | Travailler en synergie pour assurer une couverture sécuritaire optimale |
-
----
-
-## 📦 Objectifs du Projet
-
-- ✅ Réaliser un audit Black Box (binaire + librairie dynamique uniquement).
-- ✅ Réaliser un audit White Box (accès complet au code source).
-- ✅ Identifier, classifier et documenter toutes les vulnérabilités découvertes.
-- ✅ Exploiter les failles **sans modifier le code original**.
-- ✅ Corriger les vulnérabilités en C, de façon sécurisée.
-- ✅ Écrire des tests unitaires pour valider chaque correctif.
-- ✅ Générer un fichier `.patch` par correction.
-- ✅ Rédiger un rapport de vulnérabilités clair et professionnel.
-- ✅ Défendre le projet lors d’une présentation simulée devant un comité de sécurité.
-
----
-
-## 🧰 Environnement & Outils
-
-- **Langage** : C
-- **Système** : Linux
-- **Commande d’exécution** :
+## Appliquer les correctifs
 
 ```bash
-chmod 655 ./pipeto
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD
+# depuis la racine du dépôt
+git apply patch/<nom_du_fichier>.patch
 ```
 
-## 📝 Template du Rapport
-
-### Faille X, [Nom de la commande vulnérable]
-- **Gravité** : [faible / moyenne / élevée / critique]
-- **Type** : [Buffer Overflow, Format String, Use-After-Free, etc.]
-- **Fichier** : `src/[nom_du_fichier].c`
-- **Fonction** : `[nom_de_la_fonction]`
-- **Détectée lors de** : [Audit Black Box / Audit White Box]
-
-**Demonstration :**  
-[Description technique détaillée de la faille]
-
-**Proof of Concept :**  
-[Étapes ou script permettant de reproduire l'exploitation]
-
-**Impact :**  
-[Exécution de code à distance, crash, élévation de privilège, etc.]
-
-**Résumé de la correction :**
-- [Explication claire de la solution implémentée]
-- Fichier patch : `patch/[nom_du_fichier].c.patch`
-- Test unitaire : Oui / Non
-- Couverture de test : 100% / Partielle
-
-## 📁 Dossier Patch
-
-**Structure du dossier**
-patch/
-├── faille1.patch
-├── faille2.patch
-└── faille3.patch
-
-**git apply**
+Pour lancer le binaire vulnérable tel quel :
 
 ```bash
-git apply patch/[nom_fichier].patch
+chmod 655 ./Pipeto/Pipeto/pipeto
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/Pipeto/Pipeto
+./Pipeto/Pipeto/pipeto
 ```
 
-## 📁 Dossier libpipeto
+## Classes de vulnérabilités traitées
 
-Ce dossier contient toutes les fonctions du code source de la librairie **libpepito.so**.
-Elles ont été récupérées grâce à l'outil **ghidra** 🐉.
+Débordements de pile et de tas, chaînes de format, use-after-free, écritures hors
+bornes et secret caché dans le binaire — chacune documentée par sa gravité, son
+impact, sa preuve d'exploitation et sa correction.
